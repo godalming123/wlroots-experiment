@@ -182,11 +182,10 @@ static bool handle_keybinding(struct tinywl_server *server, xkb_keysym_t sym) {
 		focus_view(next_view, next_view->xdg_toplevel->base->surface);
 		break;
 	case XKB_KEY_Return:
-		/* Launch alacritty in forked process */
 		if (fork() == 0) {
-		   /*execl("/bin/sh", "/bin/sh", "-c", "alacritty", (void *)NULL);*/
-		    system("alacritty");
-		};
+			system("alacritty");
+			_exit (EXIT_FAILURE);
+		}
 		break;
 	default:
 		return false;
@@ -653,6 +652,7 @@ static void server_new_output(struct wl_listener *listener, void *data) {
 static void xdg_toplevel_map(struct wl_listener *listener, void *data) {
 	/* Called when the surface is mapped, or ready to display on-screen. */
 	struct tinywl_view *view = wl_container_of(listener, view, map);
+	wlr_scene_node_set_position(&view->scene_tree->node, 100, 100);
 	wl_list_insert(&view->server->views, &view->link);
 	focus_view(view, view->xdg_toplevel->base->surface);
 }
@@ -820,7 +820,7 @@ static void server_new_xdg_surface(struct wl_listener *listener, void *data) {
 		&view->request_fullscreen);
 }
 
-int main(int argc, char *argv[]) {
+int main() {
 	wlr_log_init(WLR_DEBUG, NULL);
 	char *startup_cmd = NULL;
 
